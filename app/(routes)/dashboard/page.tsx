@@ -1,4 +1,9 @@
+"use client";
 import Enrolledcourses from "@/app/_components/Enrolledcourses";
+import ExploreMore from "@/app/_components/ExploreMore";
+import InviteFriend from "@/app/_components/InviteFriend";
+import UpgradeToPro from "@/app/_components/UpgradeToPro";
+import UserStatus from "@/app/_components/UserStatus";
 import Welcomebanner from "@/app/_components/Welcomebanner";
 
 const page = () => {
@@ -9,12 +14,15 @@ const page = () => {
           <div className="lg:col-span-2">
             <Welcomebanner />
             <Enrolledcourses />
+            <ExploreMore />
           </div>
-          <div className="bg-gray-100 dark:bg-gray-800 rounded-lg p-4">
-            <h3 className="text-lg font-semibold mb-4">Sidebar</h3>
-            {/* Add sidebar content here */}
+          <div className="flex flex-col gap-6 border-2  items-center border-gray-600 p-4 rounded-lg">
+            <UserStatus />
+            <UpgradeToPro />
           </div>
         </div>
+
+        <InviteFriend />
       </div>
     </div>
   );

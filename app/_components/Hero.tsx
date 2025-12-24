@@ -4,7 +4,7 @@ import Image from "next/image";
 import bg from "@/public/bg.jpg";
 import { Button } from "@/components/ui/button";
 import { SignInButton, useUser } from "@clerk/nextjs";
-import { Link } from "lucide-react";
+import Link from "next/link";
 
 const Hero = () => {
   const { user } = useUser();
@@ -49,7 +49,7 @@ const Hero = () => {
           </SignInButton>
         ) : (
           <div className="flex items-center gap-4">
-            <Link href="/dashboard">
+            <Link href="/dashboard" className="pointer-events-auto">
               <Button
                 variant={"pixel"}
                 className="rounded-md font-game text-black pt-3 mt-6"
