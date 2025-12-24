@@ -1,4 +1,7 @@
+"use client";
+
 import { Button } from "@/components/ui/button";
+import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -64,13 +67,14 @@ const courses = [
 ];
 
 const Header_one = () => {
+  const { user } = useUser();
   return (
     <div className="flex justify-between items-center px-8 py-4 border-b border-gray-800 b-shadow-md ">
       <h2 className="font-bold font-game bg-gradient-to-r from-[#af38cd] via-[#210125] to-[#8713e6] bg-clip-text text-transparent text-3xl">
         streak-setter
       </h2>
       <h3
-        className="font-inter text-2xl bg-gradient-to-r from-pink-500 via-orange-400 to-yellow-300 bg-clip-text text-transparent"
+        className="font-inter text-2xl bg-gradient-to-r from-pink-500 via-orange-400 to-yellow-300 bg-clip-text text-transparent hidden md:block"
         style={{
           textShadow: "1px 1px 0 #000, 2px 2px 0 #fff, 3px 3px 0 #000",
           fontFamily: "'Press Start 2P', 'Pixel', monospace",
@@ -80,9 +84,6 @@ const Header_one = () => {
         create the momentum you ever dreamed
       </h3>
       <div className="flex items-center gap-4">
-        <Button className="text-black font-game rounded-md" variant={"pixel"}>
-          Sign Up
-        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="pixel" className="font-game text-black rounded-md">
@@ -134,6 +135,26 @@ const Header_one = () => {
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+        {!user ? (
+          <SignInButton mode="modal" fallbackRedirectUrl="/">
+            <Button
+              className="text-black font-game rounded-md"
+              variant={"pixel"}
+            >
+              Sign Up
+            </Button>
+          </SignInButton>
+        ) : (
+          <div className="flex items-center gap-4">
+            <Button
+              variant={"pixel"}
+              className="rounded-md text-black font-game"
+            >
+              Dashboard
+            </Button>
+            <UserButton />
+          </div>
+        )}
       </div>
     </div>
   );
