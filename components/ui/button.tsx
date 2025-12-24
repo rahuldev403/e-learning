@@ -50,13 +50,29 @@ function Button({
   }) {
   const Comp = asChild ? Slot : "button";
 
+  // Strip non-DOM props that may be injected by higher-order components (e.g., Clerk SignInButton).
+  const {
+    redirectUrl: _redirectUrl,
+    fallbackRedirectUrl: _fallbackRedirectUrl,
+    forceRedirectUrl: _forceRedirectUrl,
+    signInUrl: _signInUrl,
+    signUpUrl: _signUpUrl,
+    signInForceRedirectUrl: _signInForceRedirectUrl,
+    signUpForceRedirectUrl: _signUpForceRedirectUrl,
+    afterSignInUrl: _afterSignInUrl,
+    afterSignUpUrl: _afterSignUpUrl,
+    clerkNavigate: _clerkNavigate,
+    prefetch: _prefetch,
+    ...rest
+  } = props as any;
+
   return (
     <Comp
       data-slot="button"
       data-variant={variant}
       data-size={size}
       className={cn(buttonVariants({ variant, size, className }))}
-      {...props}
+      {...rest}
     />
   );
 }

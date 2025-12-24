@@ -8,6 +8,7 @@ import {
 } from "next/font/google";
 import "./globals.css";
 import { Provider } from "@radix-ui/react-tooltip";
+import { ClerkProvider } from "@clerk/nextjs";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -47,12 +48,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="bg-background">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${GameFont.variable} ${inter.variable} ${comfortaa.variable} antialiased`}
-      >
-        <Provider>{children}</Provider>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className="bg-background">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} ${GameFont.variable} ${inter.variable} ${comfortaa.variable} antialiased`}
+        >
+          <Provider>{children}</Provider>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

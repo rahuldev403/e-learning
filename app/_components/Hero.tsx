@@ -1,8 +1,12 @@
+"use client";
+
 import Image from "next/image";
 import bg from "@/public/bg.jpg";
 import { Button } from "@/components/ui/button";
+import { SignInButton, useUser } from "@clerk/nextjs";
 
 const Hero = () => {
+  const { user } = useUser();
   return (
     <div className="w-full relative h-screen overflow-hidden flex items-start justify-center pt-12 px-8">
       <div
@@ -33,12 +37,22 @@ const Hero = () => {
         <h2 className="m-t-5 font-game text-3xl text-gray-300">
           Beginner friendly coidng courses and projects
         </h2>
-        <Button
-          variant={"pixel"}
-          className="rounded-md mt-5 font-game text-bold pointer-events-auto"
-        >
-          Get Started
-        </Button>
+        {!user ? (
+          <SignInButton mode="modal" fallbackRedirectUrl="/">
+            <Button
+              className="text-black font-game rounded-md pt-3 mt-6"
+              variant={"pixel"}
+            >
+              Sign Up
+            </Button>
+          </SignInButton>
+        ) : (
+          <div className="flex items-center gap-4">
+            <Button variant={"pixel"} className="rounded-md font-game text-black pt-3 mt-6">
+              go to Dashboard
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );
