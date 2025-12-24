@@ -19,7 +19,7 @@ const buttonVariants = cva(
         ghost:
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         pixel:
-          "border-2 border-black bg-white text-black shadow-[2px_2px_0_0_#000] hover:bg-gray-100 active:shadow-none rounded-none font-mono",
+          "border-2 border-black bg-white text-black shadow-[2px_2px_0_0_#000] active:shadow-none rounded-none font-mono active:translate-x-[2px] active:translate-y-[2px] transition-all cursor-pointer [&:not([data-slot='carousel-previous']):not([data-slot='carousel-next'])]:hover:bg-gray-100 [&:not([data-slot='carousel-previous']):not([data-slot='carousel-next'])]:hover:translate-x-[2px] [&:not([data-slot='carousel-previous']):not([data-slot='carousel-next'])]:hover:translate-y-[2px]",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
