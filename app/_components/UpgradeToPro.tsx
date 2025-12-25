@@ -6,6 +6,7 @@ import checkmark from "@/public/crown.png"; // You can use a checkmark icon if a
 import Image from "next/image";
 import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
+import { Sparkles } from "lucide-react";
 
 const UpgradeToPro = () => {
   const { user } = useUser();
@@ -25,8 +26,9 @@ const UpgradeToPro = () => {
         <h2 className="font-bold mt-4 font-comfortaa text-green-700 dark:text-green-300">
           Premium Member
         </h2>
-        <h5 className="font-comfortaa font-bold text-center mb-2 text-green-600 dark:text-green-400">
-          You have unlimited access to all courses! 🎉
+        <h5 className="font-comfortaa font-bold text-center mb-2 text-green-600 dark:text-green-400 flex items-center gap-2">
+          You have unlimited access to all courses!
+          <Sparkles className="w-4 h-4" />
         </h5>
         <Button
           variant={"pixel"}

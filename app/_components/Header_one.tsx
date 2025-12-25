@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { SignInButton, UserButton, useUser } from "@clerk/nextjs";
+import { LayoutDashboard, Settings } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -159,7 +160,7 @@ const Header_one = () => {
                 className="rounded-md text-black font-game text-xs sm:text-sm px-3 sm:px-4"
               >
                 <span className="hidden sm:inline">Dashboard</span>
-                <span className="sm:hidden">📊</span>
+                <LayoutDashboard className="sm:hidden w-4 h-4" />
               </Button>
             </Link>
             {isAdmin(user?.primaryEmailAddress?.emailAddress) && (
@@ -169,7 +170,7 @@ const Header_one = () => {
                   className="rounded-md text-black font-game text-xs sm:text-sm px-3 sm:px-4"
                 >
                   <span className="hidden sm:inline">Admin</span>
-                  <span className="sm:hidden">⚙️</span>
+                  <Settings className="sm:hidden w-4 h-4" />
                 </Button>
               </Link>
             )}

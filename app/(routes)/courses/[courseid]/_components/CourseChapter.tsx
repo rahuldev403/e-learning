@@ -12,7 +12,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Loader2, Play, Lock } from "lucide-react";
+import { Loader2, Play, Lock, Rocket, Dumbbell } from "lucide-react";
 import Link from "next/link";
 
 interface Chapter {
@@ -157,7 +157,7 @@ const CourseChapter = ({
                 : status === "up-next"
                 ? "Up Next"
                 : status === "premium-locked"
-                ? "🔒 Premium"
+                ? "Premium"
                 : "Locked";
             const isLockedState =
               !isEnrolled || status === "locked" || status === "up-next";
@@ -218,7 +218,8 @@ const CourseChapter = ({
                             variant="pixel"
                             className="font-game bg-yellow-500 hover:bg-yellow-600 border-4 border-yellow-700"
                           >
-                            🚀 Upgrade to Premium
+                            <Rocket className="w-4 h-4 mr-2" />
+                            Upgrade to Premium
                           </Button>
                         </Link>
                       </div>
@@ -234,8 +235,9 @@ const CourseChapter = ({
 
                       {chapter.exercise && (
                         <div className="bg-yellow-100 dark:bg-yellow-900/30 border-4 border-yellow-500 rounded-none p-3 sm:p-4 shadow-[4px_4px_0_0_#d97706]">
-                          <h4 className="font-bold font-game text-yellow-800 dark:text-yellow-200 mb-2 text-base sm:text-lg">
-                            💪 Exercise Challenge
+                          <h4 className="font-bold font-game text-yellow-800 dark:text-yellow-200 mb-2 text-base sm:text-lg flex items-center gap-2">
+                            <Dumbbell className="w-4 h-4 sm:w-5 sm:h-5" />
+                            Exercise Challenge
                           </h4>
                           <p className="text-xs sm:text-sm text-yellow-700 dark:text-yellow-300 font-mono">
                             {chapter.exercise}
@@ -374,7 +376,7 @@ const CourseChapter = ({
                               : `✨ ${
                                   totalChapters - completedCount
                                 } chapters left. Keep going!`
-                            : "🔒 Enroll to unlock chapter content."}
+                            : "Enroll to unlock chapter content."}
                         </p>
                       </div>
                     </div>

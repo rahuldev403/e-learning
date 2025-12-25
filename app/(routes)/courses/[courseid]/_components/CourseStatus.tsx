@@ -1,4 +1,5 @@
 "use client";
+import { Target, PartyPopper, Flame } from "lucide-react";
 
 interface Course {
   id: number;
@@ -52,10 +53,8 @@ const CourseStatus = ({
   const statusMessage = !isEnrolled
     ? "Enroll to unlock exercises and track your progress."
     : safeCompleted >= totalExercises
-    ? "🎉 You completed every exercise! Grab your badge."
-    : `🔥 ${
-        totalExercises - safeCompleted
-      } exercises left to finish this course.`;
+    ? "completed"
+    : "progress";
   const enrolledDate = courseDetail?.enrolledCourse?.enrolledDate
     ? new Date(courseDetail.enrolledCourse.enrolledDate).toLocaleDateString()
     : null;
@@ -64,14 +63,29 @@ const CourseStatus = ({
     <div>
       <div className="p-4 sm:p-6 bg-gray-200 dark:bg-gray-800 border-4 border-gray-800 shadow-[6px_6px_0_0_#000] dark:shadow-[6px_6px_0_0_#fff] min-h-60 sm:min-h-80 rounded-md">
         <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-          <span className="text-xl sm:text-2xl">🎯</span>
+          <Target className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
           <h3 className="font-bold font-game text-lg sm:text-xl md:text-2xl text-black dark:text-white">
             Course Progress
           </h3>
         </div>
 
-        <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-4 sm:mb-6 font-comfortaa">
-          {isLoading ? "Syncing your chapters..." : statusMessage}
+        <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-4 sm:mb-6 font-comfortaa flex items-center gap-2">
+          {isLoading ? (
+            "Syncing your chapters..."
+          ) : statusMessage === "completed" ? (
+            <>
+              <PartyPopper className="w-4 h-4 sm:w-5 sm:h-5 text-green-600 dark:text-green-400" />
+              You completed every exercise! Grab your badge.
+            </>
+          ) : statusMessage === "progress" ? (
+            <>
+              <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 dark:text-orange-400" />
+              {totalExercises - safeCompleted} exercises left to finish this
+              course.
+            </>
+          ) : (
+            statusMessage
+          )}
         </p>
 
         <div className="space-y-2 sm:space-y-3">
