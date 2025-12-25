@@ -1,15 +1,16 @@
 "use client";
 
 import axios from "axios";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { LoadingScreen } from "@/components/ui/loading-screen";
 import CourseBanner from "./_components/CourseBanner";
 import CourseChapter from "./_components/CourseChapter";
 import CourseStatus from "./_components/CourseStatus";
 import UpgradeToPro from "@/app/_components/UpgradeToPro";
 import { CommunityHelp } from "./_components/CommunityHelp";
+import { useUser } from "@clerk/nextjs";
+import { MonitorIcon } from "lucide-react";
 
 type Chapter = {
   id: number;
@@ -27,7 +28,7 @@ interface EnrolledCourse {
   progress: number;
 }
 
-interface Course {
+export interface Course {
   id: number;
   courseId: string;
   title: string;
@@ -38,16 +39,41 @@ interface Course {
   Chapters?: Chapter[];
   isEnrolled?: boolean;
   enrolledCourse?: EnrolledCourse | null;
+  completedChapters?: UserProgress[];
+}
+interface UserProgress {
+  id: number;
+  userId: string;
+  courseId: string;
+  chapterId: string;
+  updatedAt: string;
 }
 
 const CourseDetail = () => {
   const { courseid } = useParams<{ courseid: string }>();
+  const router = useRouter();
+  const { user } = useUser();
   const [course, setCourse] = useState<Course | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [chaptersLoading, setChaptersLoading] = useState(true);
   const [chaptersError, setChaptersError] = useState<string | null>(null);
+  const [isSmallDevice, setIsSmallDevice] = useState(false);
+
+  // Check if device is small (mobile/tablet)
+  useEffect(() => {
+    const checkDeviceSize = () => {
+      setIsSmallDevice(window.innerWidth < 1024); // Block devices smaller than 1024px
+    };
+
+    checkDeviceSize();
+    window.addEventListener("resize", checkDeviceSize);
+
+    return () => window.removeEventListener("resize", checkDeviceSize);
+  }, []);
+
+  const hasPremiumAccess = user?.publicMetadata?.plan === "unlimited";
 
   const fetchCourse = useCallback(async () => {
     if (!courseid) return;
@@ -128,6 +154,34 @@ const CourseDetail = () => {
         await fetchCourse();
         toast.success("Progress updated!");
       } catch (error) {
+        // Block access on small devices
+        if (isSmallDevice) {
+          return (
+            <div className="h-[calc(100vh-73px)] w-full flex items-center justify-center px-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800">
+              <div className="max-w-md text-center border-4 border-gray-800 bg-white dark:bg-gray-900 p-8 shadow-[8px_8px_0_0_#000] dark:shadow-[8px_8px_0_0_#fff]">
+                <MonitorIcon className="w-20 h-20 mx-auto mb-6 text-blue-600" />
+                <h2 className="font-game text-2xl mb-4 text-gray-900 dark:text-white">
+                  [!] Desktop Required
+                </h2>
+                <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">
+                  Course content and exercises are best viewed on a larger
+                  screen for an optimal learning experience.
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                  Please access this page from a desktop or laptop computer
+                  (minimum 1024px width).
+                </p>
+                <button
+                  onClick={() => router.push("/courses")}
+                  className="px-6 py-3 bg-blue-500 hover:bg-blue-600 text-white border-2 border-black font-game shadow-[4px_4px_0_0_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#000] transition-all"
+                >
+                  [←] Back to Courses
+                </button>
+              </div>
+            </div>
+          );
+        }
+
         console.error("Failed to update progress:", error);
         toast.error("Failed to update progress. Please try again.");
       }
@@ -143,7 +197,14 @@ const CourseDetail = () => {
   );
 
   if (loading) {
-    return <LoadingScreen message="Loading course..." size="lg" />;
+    return (
+      <div className="h-[calc(100vh-73px)] w-full flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-gray-900 dark:border-white mx-auto mb-4"></div>
+          <p className="font-game text-xl">Loading course...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
@@ -176,8 +237,8 @@ const CourseDetail = () => {
         courseDetail={course}
         refreshData={fetchCourse}
       />
-      <div className="grid grid-cols-4 p-5 gap-4">
-        <div className="col-span-2">
+      <div className="grid grid-cols-1 lg:grid-cols-2 p-3 sm:p-5 gap-4 sm:gap-6 max-w-7xl mx-auto">
+        <div className="w-full">
           <CourseChapter
             loading={loading}
             chapters={chapters}
@@ -187,9 +248,11 @@ const CourseDetail = () => {
             isEnrolled={isEnrolled}
             completedExercises={completedExercises}
             onCompleteChapter={handleChapterComplete}
+            courseId={course.courseId}
+            hasPremiumAccess={hasPremiumAccess}
           />
         </div>
-        <div className="col-span-2 flex flex-col gap-6 justify-between ">
+        <div className="w-full flex flex-col gap-4 sm:gap-6">
           <CourseStatus
             loading={loading}
             courseDetail={course}

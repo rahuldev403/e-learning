@@ -7,13 +7,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
-import { LoadingScreen } from "@/components/ui/loading-screen";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Loader2, Play } from "lucide-react";
+import { Loader2, Play, Lock, Rocket, Dumbbell } from "lucide-react";
+import Link from "next/link";
 
 interface Chapter {
   id: number;
@@ -32,6 +32,8 @@ type Props = {
   isEnrolled?: boolean;
   completedExercises?: number;
   onCompleteChapter?: (chapterIndex: number) => Promise<void> | void;
+  courseId: string;
+  hasPremiumAccess?: boolean;
 };
 
 const CourseChapter = ({
@@ -43,10 +45,14 @@ const CourseChapter = ({
   isEnrolled,
   completedExercises = 0,
   onCompleteChapter,
+  courseId,
+  hasPremiumAccess = false,
 }: Props) => {
   const [completingChapter, setCompletingChapter] = useState<number | null>(
     null
   );
+
+  const FREE_CHAPTERS_LIMIT = 4;
 
   const handlePlayChapter = (chapterId: number, chapterName: string) => {
     // TODO: Implement video player or chapter content display
@@ -67,6 +73,12 @@ const CourseChapter = ({
 
   const getChapterStatus = (index: number) => {
     if (!isEnrolled) return "locked" as const;
+
+    // Check if chapter is beyond free tier and user doesn't have premium
+    if (index >= FREE_CHAPTERS_LIMIT && !hasPremiumAccess) {
+      return "premium-locked" as const;
+    }
+
     if (index < completedCount) return "completed" as const;
     if (index === completedCount) return "in-progress" as const;
     return "up-next" as const;
@@ -81,23 +93,32 @@ const CourseChapter = ({
       "bg-blue-400/20 text-blue-900 dark:text-blue-100 border-blue-500",
     locked:
       "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 border-gray-500",
+    "premium-locked":
+      "bg-yellow-400/30 text-yellow-900 dark:text-yellow-200 border-yellow-600",
   };
 
   if (loading || chaptersLoading) {
-    return <LoadingScreen message="Loading chapters..." size="md" />;
+    return (
+      <div className="flex flex-col items-center justify-center py-12">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-gray-900 dark:border-white mb-4"></div>
+        <p className="font-game text-xl">Loading chapters...</p>
+      </div>
+    );
   }
 
   if (chaptersError) {
     return (
-      <div className="border-4 border-gray-800 rounded-lg p-8 bg-red-50 dark:bg-red-900/20 text-center">
-        <h3 className="text-2xl font-bold font-game mb-4 text-red-800 dark:text-red-200">
+      <div className="border-4 border-gray-800 rounded-lg p-4 sm:p-6 lg:p-8 bg-red-50 dark:bg-red-900/20 text-center mx-4">
+        <h3 className="text-xl sm:text-2xl font-bold font-game mb-4 text-red-800 dark:text-red-200">
           Error Loading Chapters
         </h3>
-        <p className="text-red-600 dark:text-red-300">{chaptersError}</p>
+        <p className="text-sm sm:text-base text-red-600 dark:text-red-300">
+          {chaptersError}
+        </p>
         <Button
           variant="pixel"
           onClick={onRetryChapters}
-          className="mt-4 font-game"
+          className="mt-4 font-game text-sm sm:text-base"
         >
           Retry
         </Button>
@@ -107,8 +128,8 @@ const CourseChapter = ({
 
   if (chapters.length === 0) {
     return (
-      <div className="border-4 border-gray-800 rounded-lg p-8 bg-white dark:bg-gray-800 text-center">
-        <h3 className="text-2xl font-bold font-game mb-4">
+      <div className="border-4 border-gray-800 rounded-lg p-4 sm:p-6 lg:p-8 bg-white dark:bg-gray-800 text-center mx-4">
+        <h3 className="text-xl sm:text-2xl font-bold font-game mb-4">
           No Chapters Available
         </h3>
         <p className="text-muted-foreground">
@@ -119,11 +140,13 @@ const CourseChapter = ({
   }
 
   return (
-    <div id="course-chapters" className="space-y-6">
-      <div className="rounded-lg bg-white dark:bg-gray-800 p-6 border-4 border-gray-800 shadow-[6px_6px_0_0_#000] dark:shadow-[6px_6px_0_0_#fff] max-h-210 overflow-y-auto">
-        <h2 className="text-3xl font-bold font-game mb-6">Course Chapters</h2>
+    <div id="course-chapters" className="space-y-4 sm:space-y-6 px-4">
+      <div className="rounded-lg bg-white dark:bg-gray-800 p-4 sm:p-6 border-4 border-gray-800 shadow-[6px_6px_0_0_#000] dark:shadow-[6px_6px_0_0_#fff] max-h-210 overflow-y-auto">
+        <h2 className="text-2xl sm:text-3xl font-bold font-game mb-4 sm:mb-6">
+          Course Chapters
+        </h2>
 
-        <Accordion type="single" collapsible className="space-y-4">
+        <Accordion type="single" collapsible className="space-y-3 sm:space-y-4">
           {chapters.map((chapter, index) => {
             const status = getChapterStatus(index);
             const statusLabel =
@@ -133,7 +156,14 @@ const CourseChapter = ({
                 ? "In Progress"
                 : status === "up-next"
                 ? "Up Next"
+                : status === "premium-locked"
+                ? "Premium"
                 : "Locked";
+            const isLockedState =
+              !isEnrolled || status === "locked" || status === "up-next";
+            const isPremiumLocked = status === "premium-locked";
+            const isCurrent = status === "in-progress";
+            const isCompleted = status === "completed";
 
             return (
               <AccordionItem
@@ -141,161 +171,216 @@ const CourseChapter = ({
                 value={`item-${chapter.id}`}
                 className="border-4 border-gray-800 rounded-none bg-white dark:bg-gray-800 shadow-[4px_4px_0_0_#000] dark:shadow-[4px_4px_0_0_#fff]"
               >
-                <AccordionTrigger className="px-6 py-4 hover:no-underline hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-game text-lg font-bold text-left hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#000] dark:hover:shadow-[2px_2px_0_0_#fff]">
-                  <div className="flex items-center gap-4">
-                    <span className="bg-black text-white dark:bg-white dark:text-black rounded-none w-10 h-10 flex items-center justify-center text-lg font-bold border-2 border-gray-800 shadow-[2px_2px_0_0_#666]">
-                      {index + 1}
+                <AccordionTrigger
+                  className="px-3 sm:px-6 py-3 sm:py-4 hover:no-underline hover:bg-gray-100 dark:hover:bg-gray-700 transition-all font-game text-base sm:text-lg font-bold text-left hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[2px_2px_0_0_#000] dark:hover:shadow-[2px_2px_0_0_#fff]"
+                  disabled={isPremiumLocked}
+                >
+                  <div className="flex items-center gap-2 sm:gap-4 w-full min-w-0 overflow-hidden">
+                    <span className="bg-black text-white dark:bg-white dark:text-black rounded-none w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-base sm:text-lg font-bold border-2 border-gray-800 shadow-[2px_2px_0_0_#666] flex-shrink-0">
+                      {isPremiumLocked ? (
+                        <Lock className="w-4 h-4" />
+                      ) : (
+                        index + 1
+                      )}
                     </span>
-                    <span className="text-black dark:text-white">
+                    <span
+                      className={`flex-1 min-w-0 overflow-hidden text-ellipsis whitespace-nowrap text-sm sm:text-base ${
+                        isPremiumLocked
+                          ? "text-gray-500 dark:text-gray-400"
+                          : "text-black dark:text-white"
+                      }`}
+                    >
                       {chapter.name}
                     </span>
                     <span
-                      className={`text-xs font-mono border px-2 py-0.5 rounded-none ${statusStyles[status]}`}
+                      className={`text-[10px] sm:text-xs font-mono border px-1 sm:px-2 py-0.5 rounded-none flex-shrink-0 whitespace-nowrap ${statusStyles[status]}`}
                     >
                       {statusLabel}
                     </span>
                   </div>
                 </AccordionTrigger>
 
-                <AccordionContent className="px-6 pb-6">
-                  <div className="space-y-4 pt-4 border-t-4 border-gray-800 border-dashed">
-                    <div className="prose dark:prose-invert max-w-none">
-                      <p className="text-gray-700 dark:text-gray-300 leading-relaxed text-base">
-                        {chapter.desc}
-                      </p>
-                    </div>
-
-                    {chapter.exercise && (
-                      <div className="bg-yellow-100 dark:bg-yellow-900/30 border-4 border-yellow-500 rounded-none p-4 shadow-[4px_4px_0_0_#d97706]">
-                        <h4 className="font-bold font-game text-yellow-800 dark:text-yellow-200 mb-2 text-lg">
-                          💪 Exercise Challenge
+                <AccordionContent className="px-3 sm:px-6 pb-4 sm:pb-6">
+                  {isPremiumLocked ? (
+                    <div className="space-y-4 pt-4 border-t-4 border-gray-800 border-dashed">
+                      <div className="bg-yellow-400/20 border-4 border-yellow-600 rounded-none p-6 shadow-[6px_6px_0_0_#d97706] text-center">
+                        <Lock className="w-12 h-12 mx-auto mb-4 text-yellow-700 dark:text-yellow-300" />
+                        <h4 className="font-bold font-game text-xl mb-2 text-yellow-800 dark:text-yellow-200">
+                          Premium Content Locked
                         </h4>
-                        <p className="text-sm text-yellow-700 dark:text-yellow-300 font-mono">
-                          {chapter.exercise}
+                        <p className="text-sm text-yellow-700 dark:text-yellow-300 mb-4 font-comfortaa">
+                          Upgrade to Premium to unlock all{" "}
+                          {totalChapters - FREE_CHAPTERS_LIMIT} remaining
+                          chapters and get full access to this course!
                         </p>
-                      </div>
-                    )}
-
-                    <div className="flex gap-4 pt-4 flex-wrap">
-                      {isEnrolled ? (
-                        <>
+                        <Link href="/pricing">
                           <Button
                             variant="pixel"
-                            onClick={() =>
-                              handlePlayChapter(chapter.id, chapter.name)
-                            }
-                            className="font-game border-4 border-gray-800 shadow-[4px_4px_0_0_#111]"
+                            className="font-game bg-yellow-500 hover:bg-yellow-600 border-4 border-yellow-700"
                           >
-                            <Play className="w-5 h-5 mr-2" /> Start Chapter
+                            <Rocket className="w-4 h-4 mr-2" />
+                            Upgrade to Premium
                           </Button>
-                          <Button
-                            variant="outline"
-                            className="font-game border-4 border-gray-800 rounded-none shadow-[4px_4px_0_0_#111]"
-                          >
-                            Notes
-                          </Button>
-                          <Button
-                            variant="secondary"
-                            onClick={() => handleCompleteClick(index)}
-                            disabled={
-                              status === "completed" ||
-                              completingChapter === index
-                            }
-                            className="font-game border-4 border-gray-800 rounded-none shadow-[4px_4px_0_0_#111] min-w-40"
-                          >
-                            {completingChapter === index ? (
-                              <>
-                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                                Saving...
-                              </>
-                            ) : status === "completed" ? (
-                              "Completed"
-                            ) : (
-                              "Mark Complete"
-                            )}
-                          </Button>
-                        </>
-                      ) : (
-                        <>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span
-                                tabIndex={0}
-                                aria-disabled="true"
-                                className="inline-flex"
-                              >
-                                <Button
-                                  variant="pixel"
-                                  disabled
-                                  className="font-game text-gray-500 bg-gray-300 dark:bg-gray-700 dark:text-gray-400 border-4 border-gray-400 dark:border-gray-600 shadow-[4px_4px_0_0_#9ca3af] cursor-not-allowed opacity-60"
-                                >
-                                  <Play className="w-5 h-5 mr-2 fill-current" />
-                                  Start Chapter
-                                </Button>
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Enroll to unlock this chapter</p>
-                            </TooltipContent>
-                          </Tooltip>
+                        </Link>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 sm:space-y-4 pt-3 sm:pt-4 border-t-4 border-gray-800 border-dashed">
+                      {/* Original content */}
+                      <div className="prose dark:prose-invert max-w-none">
+                        <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 leading-relaxed">
+                          {chapter.desc}
+                        </p>
+                      </div>
 
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span
-                                tabIndex={0}
-                                aria-disabled="true"
-                                className="inline-flex"
-                              >
-                                <Button
-                                  variant="pixel"
-                                  disabled
-                                  className="font-game text-gray-500 bg-gray-300 dark:bg-gray-700 dark:text-gray-400 border-4 border-gray-400 dark:border-gray-600 shadow-[4px_4px_0_0_#9ca3af] cursor-not-allowed opacity-60"
-                                >
-                                  Read Notes
-                                </Button>
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Enroll to unlock this chapter</p>
-                            </TooltipContent>
-                          </Tooltip>
-
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <span
-                                tabIndex={0}
-                                aria-disabled="true"
-                                className="inline-flex"
-                              >
-                                <Button
-                                  variant="pixel"
-                                  disabled
-                                  className="font-game text-gray-500 bg-gray-300 dark:bg-gray-700 dark:text-gray-400 border-4 border-gray-400 dark:border-gray-600 shadow-[4px_4px_0_0_#9ca3af] cursor-not-allowed opacity-60"
-                                >
-                                  Mark Complete
-                                </Button>
-                              </span>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Enroll to unlock this chapter</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </>
+                      {chapter.exercise && (
+                        <div className="bg-yellow-100 dark:bg-yellow-900/30 border-4 border-yellow-500 rounded-none p-3 sm:p-4 shadow-[4px_4px_0_0_#d97706]">
+                          <h4 className="font-bold font-game text-yellow-800 dark:text-yellow-200 mb-2 text-base sm:text-lg flex items-center gap-2">
+                            <Dumbbell className="w-4 h-4 sm:w-5 sm:h-5" />
+                            Exercise Challenge
+                          </h4>
+                          <p className="text-xs sm:text-sm text-yellow-700 dark:text-yellow-300 font-mono">
+                            {chapter.exercise}
+                          </p>
+                        </div>
                       )}
-                    </div>
 
-                    <div className="mt-2 p-3 border-2 rounded-none bg-orange-100 dark:bg-orange-900/30 border-orange-400">
-                      <p className="text-xs font-mono">
-                        {isEnrolled
-                          ? completedCount >= totalChapters
-                            ? "🏁 You finished every chapter in this course!"
-                            : `✨ ${
-                                totalChapters - completedCount
-                              } chapters left. Keep going!`
-                          : "🔒 Enroll to unlock chapter content."}
-                      </p>
+                      <div className="flex gap-2 sm:gap-4 pt-3 sm:pt-4 flex-wrap">
+                        {!isLockedState ? (
+                          <>
+                            <Link href={`/courses/${courseId}/${chapter.name}`}>
+                              <Button
+                                variant="pixel"
+                                onClick={() =>
+                                  handlePlayChapter(chapter.id, chapter.name)
+                                }
+                                className="font-game border-4 border-gray-800 shadow-[4px_4px_0_0_#111] text-xs sm:text-sm"
+                              >
+                                <Play className="w-5 h-5 mr-2" /> Start Chapter
+                              </Button>
+                            </Link>
+                            <Button
+                              variant="outline"
+                              className="font-game border-4 border-gray-800 rounded-none shadow-[4px_4px_0_0_#111]"
+                            >
+                              Notes
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              onClick={() => handleCompleteClick(index)}
+                              disabled={
+                                isCompleted ||
+                                completingChapter === index ||
+                                !isCurrent
+                              }
+                              className="font-game border-4 border-gray-800 rounded-none shadow-[4px_4px_0_0_#111] min-w-40"
+                            >
+                              {completingChapter === index ? (
+                                <>
+                                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                  Saving...
+                                </>
+                              ) : isCompleted ? (
+                                "Completed"
+                              ) : (
+                                "Mark Complete"
+                              )}
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span
+                                  tabIndex={0}
+                                  aria-disabled="true"
+                                  className="inline-flex"
+                                >
+                                  <Button
+                                    variant="pixel"
+                                    disabled
+                                    className="font-game text-gray-500 bg-gray-300 dark:bg-gray-700 dark:text-gray-400 border-4 border-gray-400 dark:border-gray-600 shadow-[4px_4px_0_0_#9ca3af] cursor-not-allowed opacity-60"
+                                  >
+                                    <Play className="w-5 h-5 mr-2 fill-current" />
+                                    Start Chapter
+                                  </Button>
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>
+                                  {isEnrolled
+                                    ? "Complete the previous chapter to unlock this one"
+                                    : "Enroll to unlock this chapter"}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span
+                                  tabIndex={0}
+                                  aria-disabled="true"
+                                  className="inline-flex"
+                                >
+                                  <Button
+                                    variant="pixel"
+                                    disabled
+                                    className="font-game text-gray-500 bg-gray-300 dark:bg-gray-700 dark:text-gray-400 border-4 border-gray-400 dark:border-gray-600 shadow-[4px_4px_0_0_#9ca3af] cursor-not-allowed opacity-60"
+                                  >
+                                    Read Notes
+                                  </Button>
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>
+                                  {isEnrolled
+                                    ? "Complete the previous chapter to unlock this one"
+                                    : "Enroll to unlock this chapter"}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <span
+                                  tabIndex={0}
+                                  aria-disabled="true"
+                                  className="inline-flex"
+                                >
+                                  <Button
+                                    variant="pixel"
+                                    disabled
+                                    className="font-game text-gray-500 bg-gray-300 dark:bg-gray-700 dark:text-gray-400 border-4 border-gray-400 dark:border-gray-600 shadow-[4px_4px_0_0_#9ca3af] cursor-not-allowed opacity-60"
+                                  >
+                                    Mark Complete
+                                  </Button>
+                                </span>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>
+                                  {isEnrolled
+                                    ? "Complete the previous chapter to unlock this one"
+                                    : "Enroll to unlock this chapter"}
+                                </p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </>
+                        )}
+                      </div>
+
+                      <div className="mt-2 p-3 border-2 rounded-none bg-orange-100 dark:bg-orange-900/30 border-orange-400">
+                        <p className="text-xs font-mono">
+                          {isEnrolled
+                            ? completedCount >= totalChapters
+                              ? "🏁 You finished every chapter in this course!"
+                              : `✨ ${
+                                  totalChapters - completedCount
+                                } chapters left. Keep going!`
+                            : "Enroll to unlock chapter content."}
+                        </p>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </AccordionContent>
               </AccordionItem>
             );
