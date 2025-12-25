@@ -3,6 +3,7 @@
 import axios from "axios";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { LoadingScreen } from "@/components/ui/loading-screen";
 import CourseBanner from "./_components/CourseBanner";
 import CourseChapter from "./_components/CourseChapter";
@@ -18,6 +19,14 @@ type Chapter = {
   exercise: string | null;
 };
 
+interface EnrolledCourse {
+  id: number;
+  courseId: string;
+  userId: string;
+  enrolledDate: string;
+  progress: number;
+}
+
 interface Course {
   id: number;
   courseId: string;
@@ -27,6 +36,8 @@ interface Course {
   level: string;
   tags: string;
   Chapters?: Chapter[];
+  isEnrolled?: boolean;
+  enrolledCourse?: EnrolledCourse | null;
 }
 
 const CourseDetail = () => {
@@ -38,29 +49,29 @@ const CourseDetail = () => {
   const [chaptersLoading, setChaptersLoading] = useState(true);
   const [chaptersError, setChaptersError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchCourse = async () => {
-      if (!courseid) return;
+  const fetchCourse = useCallback(async () => {
+    if (!courseid) return;
 
-      try {
-        setLoading(true);
-        setError(null);
-        const result = await axios.get(`/api/course?courseId=${courseid}`);
-        setCourse(result.data);
-      } catch (error) {
-        console.error("Failed to fetch course:", error);
-        if (axios.isAxiosError(error) && error.response?.status === 404) {
-          setError("Course not found");
-        } else {
-          setError("Failed to load course. Please try again.");
-        }
-      } finally {
-        setLoading(false);
+    try {
+      setLoading(true);
+      setError(null);
+      const result = await axios.get(`/api/course?courseId=${courseid}`);
+      setCourse(result.data);
+    } catch (error) {
+      console.error("Failed to fetch course:", error);
+      if (axios.isAxiosError(error) && error.response?.status === 404) {
+        setError("Course not found");
+      } else {
+        setError("Failed to load course. Please try again.");
       }
-    };
-
-    fetchCourse();
+    } finally {
+      setLoading(false);
+    }
   }, [courseid]);
+
+  useEffect(() => {
+    fetchCourse();
+  }, [fetchCourse]);
 
   const fetchChapters = useCallback(async () => {
     if (!courseid) {
@@ -86,6 +97,51 @@ const CourseDetail = () => {
     fetchChapters();
   }, [fetchChapters]);
 
+  const handleChapterComplete = useCallback(
+    async (chapterIndex: number) => {
+      if (!course?.isEnrolled) {
+        toast.error("Enroll in the course to track progress.");
+        return;
+      }
+
+      const courseIdentifier = course.courseId ?? courseid;
+      if (!courseIdentifier) return;
+
+      const currentProgress = course.enrolledCourse?.progress ?? 0;
+      const targetProgress = Math.min(
+        chapters.length,
+        Math.max(currentProgress, chapterIndex + 1)
+      );
+
+      if (targetProgress === currentProgress) {
+        toast("Already completed", {
+          description: "This chapter is already marked complete.",
+        });
+        return;
+      }
+
+      try {
+        await axios.post("/api/enroll/progress", {
+          courseId: courseIdentifier,
+          progress: targetProgress,
+        });
+        await fetchCourse();
+        toast.success("Progress updated!");
+      } catch (error) {
+        console.error("Failed to update progress:", error);
+        toast.error("Failed to update progress. Please try again.");
+      }
+    },
+    [
+      chapters.length,
+      course?.courseId,
+      course?.enrolledCourse?.progress,
+      course?.isEnrolled,
+      courseid,
+      fetchCourse,
+    ]
+  );
+
   if (loading) {
     return <LoadingScreen message="Loading course..." size="lg" />;
   }
@@ -110,9 +166,16 @@ const CourseDetail = () => {
     );
   }
 
+  const isEnrolled = Boolean(course.isEnrolled);
+  const completedExercises = course.enrolledCourse?.progress ?? 0;
+
   return (
     <div>
-      <CourseBanner loading={loading} courseDetail={course} />
+      <CourseBanner
+        loading={loading}
+        courseDetail={course}
+        refreshData={fetchCourse}
+      />
       <div className="grid grid-cols-4 p-5 gap-4">
         <div className="col-span-2">
           <CourseChapter
@@ -121,6 +184,9 @@ const CourseDetail = () => {
             chaptersLoading={chaptersLoading}
             chaptersError={chaptersError}
             onRetryChapters={fetchChapters}
+            isEnrolled={isEnrolled}
+            completedExercises={completedExercises}
+            onCompleteChapter={handleChapterComplete}
           />
         </div>
         <div className="col-span-2 flex flex-col gap-6 justify-between ">
@@ -129,6 +195,8 @@ const CourseDetail = () => {
             courseDetail={course}
             chapters={chapters}
             chaptersLoading={chaptersLoading}
+            isEnrolled={isEnrolled}
+            completedExercises={completedExercises}
           />
           <UpgradeToPro />
           <CommunityHelp courseId={course.courseId} />

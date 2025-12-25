@@ -25,3 +25,11 @@ export const CourseChapterTable = pgTable("course_chapters", {
   desc: varchar({ length: 1000 }).notNull(),
   exercise: varchar({ length: 1000 }),
 });
+
+export const EnrolledCourseTable = pgTable("enrolled_courses", {
+  id: integer().primaryKey().generatedAlwaysAsIdentity(),
+  courseId: varchar({ length: 100 }).notNull(),
+  userId: varchar({ length: 100 }).notNull(),
+  enrolledDate: varchar({ length: 100 }).notNull(),
+  progress: integer().default(0).notNull(),
+});

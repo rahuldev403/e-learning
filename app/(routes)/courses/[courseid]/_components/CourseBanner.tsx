@@ -1,6 +1,15 @@
+"use client";
+
+import { useMemo, useState } from "react";
 import Image from "next/image";
-import { LoadingScreen } from "@/components/ui";
+import { useRouter } from "next/navigation";
+import axios from "axios";
+import { useUser } from "@clerk/nextjs";
+import { Loader2Icon } from "lucide-react";
+import { toast } from "sonner";
+
 import { Button } from "@/components/ui/button";
+import { LoadingScreen } from "@/components/ui";
 
 interface Course {
   id: number;
@@ -10,14 +19,64 @@ interface Course {
   bannerImage: string;
   level: string;
   tags: string;
+  isEnrolled?: boolean;
 }
 
 type Props = {
   loading?: boolean;
   courseDetail: Course | undefined;
+  refreshData?: () => Promise<void> | void;
 };
 
-const CourseBanner = ({ loading, courseDetail }: Props) => {
+const CourseBanner = ({ loading, courseDetail, refreshData }: Props) => {
+  const [loadingEnroll, setLoadingEnroll] = useState(false);
+  const { isSignedIn } = useUser();
+  const router = useRouter();
+  const courseId = courseDetail?.courseId;
+  const canEnroll = useMemo(
+    () => Boolean(courseId && !loadingEnroll),
+    [courseId, loadingEnroll]
+  );
+
+  const handleContinueScroll = () => {
+    if (typeof window === "undefined") return;
+    const target = document.getElementById("course-chapters");
+    target?.scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  const EnrollCourse = async () => {
+    if (!courseId) {
+      toast.error("Course ID missing. Please reload the page.");
+      return;
+    }
+
+    if (!isSignedIn) {
+      toast("Please sign in to enroll.", {
+        description: "You need an account to track your progress.",
+      });
+      router.push(
+        "/sign-in?redirect_url=" + encodeURIComponent(window.location.href)
+      );
+      return;
+    }
+
+    try {
+      setLoadingEnroll(true);
+      await axios.post(`/api/enroll/enroll-course`, {
+        courseId,
+      });
+      await Promise.resolve(refreshData?.());
+      toast.success("Enrolled in course successfully!");
+    } catch (error) {
+      const message = axios.isAxiosError(error)
+        ? error.response?.data?.error || error.message
+        : "Failed to enroll in course. Please try again.";
+      toast.error(message);
+    } finally {
+      setLoadingEnroll(false);
+    }
+  };
+
   return (
     <div className="flex justify-center items-center my-2">
       {loading ? (
@@ -37,12 +96,29 @@ const CourseBanner = ({ loading, courseDetail }: Props) => {
             <p className="text-lg text-gray-200 font-comfortaa text-start">
               {courseDetail?.description}
             </p>
-            <Button
-              variant="pixel"
-              className="mt-4 rounded-md text-black font-game"
-            >
-              Enroll Now
-            </Button>
+            {!courseDetail?.isEnrolled ? (
+              <Button
+                className="font-game rounded-md mt-4 text-2xl"
+                onClick={EnrollCourse}
+                disabled={!canEnroll}
+                variant={"pixel"}
+              >
+                {loadingEnroll ? (
+                  <Loader2Icon className="animate-spin mr-2 h-5 w-5" />
+                ) : null}
+                {loadingEnroll ? "Enrolling..." : "Enroll Now"}
+              </Button>
+            ) : (
+              <Button
+                variant={"pixel"}
+                className="font-game rounded-md mt-4"
+                onClick={handleContinueScroll}
+              >
+                <span className="font-game text-2xl">
+                  continue to course &rarr;
+                </span>
+              </Button>
+            )}
           </div>
         </div>
       )}
