@@ -8,6 +8,9 @@ interface Course {
   bannerImage: string;
   level: string;
   tags: string;
+  enrolledCourse?: {
+    enrolledDate: string;
+  } | null;
 }
 
 interface Chapter {
@@ -23,6 +26,8 @@ type Props = {
   chaptersLoading?: boolean;
   courseDetail?: Course | null;
   chapters: Chapter[];
+  isEnrolled?: boolean;
+  completedExercises?: number;
 };
 
 const CourseStatus = ({
@@ -30,14 +35,30 @@ const CourseStatus = ({
   chaptersLoading,
   courseDetail,
   chapters,
+  isEnrolled,
+  completedExercises = 0,
 }: Props) => {
-  const completedChapters = 0; // TODO: derive from user progress once available
+  const chaptersWithExercises = chapters.filter((chapter) =>
+    Boolean(chapter.exercise && chapter.exercise.trim().length)
+  );
+  const totalExercises = chaptersWithExercises.length || chapters.length;
   const totalChapters = chapters.length;
-  const progressPercent = totalChapters
-    ? Math.round((completedChapters / totalChapters) * 100)
+  const safeCompleted = Math.min(completedExercises, totalExercises);
+  const progressPercent = totalExercises
+    ? Math.round((safeCompleted / totalExercises) * 100)
     : 0;
 
   const isLoading = loading || chaptersLoading;
+  const statusMessage = !isEnrolled
+    ? "Enroll to unlock exercises and track your progress."
+    : safeCompleted >= totalExercises
+    ? "🎉 You completed every exercise! Grab your badge."
+    : `🔥 ${
+        totalExercises - safeCompleted
+      } exercises left to finish this course.`;
+  const enrolledDate = courseDetail?.enrolledCourse?.enrolledDate
+    ? new Date(courseDetail.enrolledCourse.enrolledDate).toLocaleDateString()
+    : null;
 
   return (
     <div>
@@ -50,16 +71,16 @@ const CourseStatus = ({
         </div>
 
         <p className="text-gray-700 dark:text-gray-300 mb-6 font-mono">
-          {isLoading
-            ? "Syncing your chapters..."
-            : "Complete all chapters to unlock your achievement badge and certificate!"}
+          {isLoading ? "Syncing your chapters..." : statusMessage}
         </p>
 
         <div className="space-y-3">
           <div className="flex justify-between items-center">
-            <span className="font-game text-sm font-bold">Progress</span>
             <span className="font-game text-sm font-bold">
-              {completedChapters} / {totalChapters}
+              Exercises Completed
+            </span>
+            <span className="font-game text-sm font-bold">
+              {safeCompleted} / {totalExercises}
             </span>
           </div>
           <div className="w-full bg-gray-400 dark:bg-gray-600 rounded-none h-6 border-4 border-gray-800 shadow-[2px_2px_0_0_#000] dark:shadow-[2px_2px_0_0_#fff] overflow-hidden">
@@ -67,12 +88,16 @@ const CourseStatus = ({
               className="bg-green-500 h-full border-r-4 border-gray-800 transition-all duration-500 relative"
               style={{ width: `${progressPercent}%` }}
             >
-              <div className="absolute inset-0 bg-linear-to-r from-green-400 to-green-600" />
+              <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-600" />
             </div>
           </div>
           <div className="flex justify-between items-center text-xs">
             <span className="text-gray-600 dark:text-gray-400 font-mono">
-              {isLoading ? "Loading progress..." : "Just getting started!"}
+              {isLoading
+                ? "Loading progress..."
+                : safeCompleted === 0
+                ? "Just getting started!"
+                : `${safeCompleted} down, keep pushing!`}
             </span>
             <span className="text-gray-600 dark:text-gray-400 font-mono">
               {progressPercent}% Complete
@@ -87,6 +112,14 @@ const CourseStatus = ({
           <div className="px-3 py-1 bg-blue-400 text-blue-800 border-2 border-blue-600 rounded-none text-xs font-bold font-game shadow-[2px_2px_0_0_#1d4ed8]">
             {totalChapters} CHAPTERS
           </div>
+          <div className="px-3 py-1 bg-green-400 text-green-900 border-2 border-green-600 rounded-none text-xs font-bold font-game shadow-[2px_2px_0_0_#15803d]">
+            {safeCompleted} EXERCISES
+          </div>
+          {enrolledDate && (
+            <div className="px-3 py-1 bg-white text-gray-900 border-2 border-gray-800 rounded-none text-xs font-bold font-game shadow-[2px_2px_0_0_#111]">
+              Enrolled {enrolledDate}
+            </div>
+          )}
         </div>
       </div>
     </div>
