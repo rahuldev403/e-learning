@@ -80,28 +80,32 @@ const Header_one = () => {
     : null;
 
   return (
-    <div className="flex justify-between items-center px-8 py-4 border-b border-gray-800 b-shadow-md ">
-      <Link href="/">
-        <h2 className="font-bold font-game bg-gradient-to-r from-[#af38cd] via-[#210125] to-[#8713e6] bg-clip-text text-transparent text-3xl">
+    <div className="flex justify-between items-center px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-b border-gray-800 b-shadow-md">
+      <Link href="/" className="flex-shrink-0">
+        <h2 className="font-bold font-game bg-gradient-to-r from-[#af38cd] via-[#210125] to-[#8713e6] bg-clip-text text-transparent text-xl sm:text-2xl lg:text-3xl">
           streak-setter
         </h2>
       </Link>
 
-      {/* Chapter name in center */}
+      {/* Chapter name in center - hide on small screens */}
       {chapterName && (
-        <div className="flex-1 text-center">
-          <h3 className="font-game text-xl text-gray-800 dark:text-gray-200">
+        <div className="hidden md:flex flex-1 text-center mx-4">
+          <h3 className="font-game text-lg lg:text-xl text-gray-800 dark:text-gray-200 truncate">
             {chapterName}
           </h3>
         </div>
       )}
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="pixel" className="font-game text-black rounded-md">
-              Menu
-              <span className="ml-2">
+            <Button
+              variant="pixel"
+              className="font-game text-black rounded-md text-xs sm:text-sm px-3 sm:px-4"
+            >
+              <span className="hidden sm:inline">Menu</span>
+              <span className="sm:hidden">☰</span>
+              <span className="ml-1 sm:ml-2 hidden sm:inline">
                 <svg width="18" height="18" viewBox="0 0 20 20" fill="none">
                   <path
                     d="M5 8L10 13L15 8"
@@ -114,14 +118,14 @@ const Header_one = () => {
               </span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="font-game">
+          <DropdownMenuContent className="font-game w-screen sm:w-auto max-w-[calc(100vw-2rem)]">
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
                 <Link href="/courses">Courses</Link>
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent
                 sideOffset={8}
-                className="bg-popover border-border shadow-lg w-[420px] max-h-[500px] overflow-y-auto p-2"
+                className="bg-popover border-border shadow-lg w-[calc(100vw-2rem)] sm:w-[420px] max-h-[500px] overflow-y-auto p-2"
               >
                 {courses.map((course) => (
                   <DropdownMenuItem key={course.id} asChild className="p-0">
