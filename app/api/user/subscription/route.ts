@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const { userId } = await auth();
+    const { userId, has } = await auth();
 
     if (!userId) {
       return NextResponse.json(
@@ -14,9 +14,8 @@ export async function GET() {
 
     const user = await currentUser();
 
-    // Check from Clerk's billing system first
-    const { has } = await auth();
-    const hasUnlimitedPlan = has?.({ plan: "unlimited" });
+    // Check using Clerk's has() method for "unlimited" plan
+    const hasUnlimitedPlan = has ? has({ plan: "unlimited" }) : false;
 
     // Fallback to publicMetadata if billing not set up
     const planFromMetadata = user?.publicMetadata?.plan as string;

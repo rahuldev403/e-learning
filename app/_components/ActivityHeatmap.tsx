@@ -28,16 +28,29 @@ const ActivityHeatmap = () => {
     fetchActivity();
   }, []);
 
-  // Generate last 90 days
-  const generateLast90Days = () => {
+  // Generate current month days
+  const generateCurrentMonthDays = () => {
     const days = [];
     const today = new Date();
-    for (let i = 89; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
+    const year = today.getFullYear();
+    const month = today.getMonth();
+
+    // Get first and last day of current month
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    // Generate all days in current month
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+      const date = new Date(year, month, day);
       days.push(date.toISOString().split("T")[0]);
     }
     return days;
+  };
+
+  // Get current month name
+  const getCurrentMonthName = () => {
+    const today = new Date();
+    return today.toLocaleString("default", { month: "long", year: "numeric" });
   };
 
   const getActivityCount = (date: string) => {
@@ -53,7 +66,7 @@ const ActivityHeatmap = () => {
     return "bg-green-600 dark:bg-green-400";
   };
 
-  const days = generateLast90Days();
+  const days = generateCurrentMonthDays();
   const weeks = [];
   for (let i = 0; i < days.length; i += 7) {
     weeks.push(days.slice(i, i + 7));
@@ -70,7 +83,7 @@ const ActivityHeatmap = () => {
   return (
     <div className="mt-4 sm:mt-6 w-full">
       <h3 className="font-game text-sm sm:text-base md:text-lg font-bold mb-3 sm:mb-4 text-center">
-        Your Activity
+        Your Activity - {getCurrentMonthName()}
       </h3>
       <div className="overflow-x-auto pb-2">
         <div className="flex gap-0.5 sm:gap-1 justify-center min-w-fit px-1">

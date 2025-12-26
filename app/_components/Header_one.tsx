@@ -134,11 +134,17 @@ const Header_one = () => {
                 )}
               </DropdownMenuSubContent>
             </DropdownMenuSub>
-            <DropdownMenuItem asChild>
-              <Link href="/links">Links</Link>
+            <DropdownMenuItem disabled>
+              <div className="flex items-center justify-between w-full">
+              <span>Problems</span>
+              <span className="text-xs text-muted-foreground ml-2">Coming soon</span>
+              </div>
             </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/projects">Projects</Link>
+            <DropdownMenuItem disabled>
+              <div className="flex items-center justify-between w-full">
+              <span>Notes</span>
+              <span className="text-xs text-muted-foreground ml-2">Coming soon</span>
+              </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
