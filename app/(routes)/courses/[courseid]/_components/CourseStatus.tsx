@@ -1,6 +1,8 @@
 "use client";
 import { Target, PartyPopper, Flame } from "lucide-react";
-
+import Image from "next/image";
+import progress from "@/public/roadmap.png";
+import flame from "@/public/fire.png";
 interface Course {
   id: number;
   courseId: string;
@@ -63,13 +65,13 @@ const CourseStatus = ({
     <div>
       <div className="p-4 sm:p-6 bg-gray-200 dark:bg-gray-800 border-4 border-gray-800 shadow-[6px_6px_0_0_#000] dark:shadow-[6px_6px_0_0_#fff] min-h-60 sm:min-h-80 rounded-md">
         <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-          <Target className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 dark:text-blue-400" />
+          <Image src={progress} alt="Progress" width={24} height={24} />
           <h3 className="font-bold font-game text-lg sm:text-xl md:text-2xl text-black dark:text-white">
             Course Progress
           </h3>
         </div>
 
-        <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-4 sm:mb-6 font-comfortaa flex items-center gap-2">
+        <div className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-4 sm:mb-6 font-comfortaa flex items-center gap-2">
           {isLoading ? (
             "Syncing your chapters..."
           ) : statusMessage === "completed" ? (
@@ -79,14 +81,14 @@ const CourseStatus = ({
             </>
           ) : statusMessage === "progress" ? (
             <>
-              <Flame className="w-4 h-4 sm:w-5 sm:h-5 text-orange-600 dark:text-orange-400" />
+              <Image src={flame} alt="Progress" width={20} height={20} />
               {totalExercises - safeCompleted} exercises left to finish this
               course.
             </>
           ) : (
             statusMessage
           )}
-        </p>
+        </div>
 
         <div className="space-y-2 sm:space-y-3">
           <div className="flex justify-between items-center">
