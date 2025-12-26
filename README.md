@@ -1,36 +1,59 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# E-Learning Platform
+
+A modern, gamified learning platform built with Next.js featuring interactive coding challenges, progress tracking, and premium subscriptions.
+
+## Features
+
+- 🎮 **Gamified Learning** - Pixel-art themed UI with activity heatmaps and progress tracking
+- 💻 **Interactive Code Editor** - Built-in Monaco editor for hands-on coding practice
+- 📚 **Course Management** - Structured courses with chapters and exercises
+- ⭐ **Premium Access** - Free tier (4 chapters) with unlimited premium subscription
+- 📊 **Progress Tracking** - Track completed exercises and course completion
+- 🌙 **Dark Mode** - Full dark mode support
+- 📧 **Invite Friends** - Email invitations with beautiful templates
+
+## Tech Stack
+
+- **Framework:** Next.js 16 with App Router
+- **Authentication:** Clerk
+- **Database:** Neon PostgreSQL with Drizzle ORM
+- **Styling:** Tailwind CSS
+- **UI Components:** Radix UI + shadcn/ui
+- **Email:** Nodemailer
 
 ## Getting Started
 
-First, run the development server:
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Set up environment variables:
+
+```env
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+
+# Database
+DATABASE_URL=
+
+# SMTP (for email invitations)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASS=
+```
+
+3. Run the development server:
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+4. Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## License
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+MIT
