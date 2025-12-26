@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { PricingModal } from "@/components/PricingModal";
+import Image from "next/image";
+import motivation from "@/public/fist.png";
 
 interface Chapter {
   id: number;
@@ -404,9 +406,15 @@ const CourseChapter = ({
                                 </>
                               ) : (
                                 <>
-                                  <Sparkles className="w-4 h-4" />{" "}
+                                  <Image
+                                    src={motivation}
+                                    alt="Motivation"
+                                    width={20}
+                                    height={20}
+                                    className="inline-block mr-1"
+                                  />
                                   {totalChapters - completedCount} chapters
-                                  left. Keep going!
+                                  left. Keep going!{" "}
                                 </>
                               )
                             ) : (
