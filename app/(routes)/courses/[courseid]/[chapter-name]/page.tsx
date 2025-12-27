@@ -14,6 +14,7 @@ import {
   CheckCircle,
   AlertTriangle,
   ArrowLeft,
+  RotateCcw,
 } from "lucide-react";
 import Image from "next/image";
 import { toast } from "sonner";
@@ -95,7 +96,22 @@ const Page = () => {
           }),
           {} as Record<string, string>
         );
-        setFileContents(initialFiles);
+
+        // Try to load saved code from localStorage
+        const storageKey = `code_${courseId}_${chapterId}`;
+        const savedCode = localStorage.getItem(storageKey);
+
+        if (savedCode) {
+          try {
+            const parsedCode = JSON.parse(savedCode);
+            setFileContents(parsedCode);
+          } catch (e) {
+            // If parsing fails, use initial files
+            setFileContents(initialFiles);
+          }
+        } else {
+          setFileContents(initialFiles);
+        }
       }
     } catch (error) {
       console.error("Failed to fetch chapter content:", error);
@@ -105,7 +121,17 @@ const Page = () => {
   };
 
   const handleCodeChange = (fileName: string, code: string) => {
-    setFileContents((prev) => ({ ...prev, [fileName]: code }));
+    setFileContents((prev) => {
+      const updated = { ...prev, [fileName]: code };
+
+      // Save to localStorage
+      if (chapterId) {
+        const storageKey = `code_${courseId}_${chapterId}`;
+        localStorage.setItem(storageKey, JSON.stringify(updated));
+      }
+
+      return updated;
+    });
   };
 
   const handleRunCode = () => {
@@ -114,6 +140,31 @@ const Page = () => {
     } else {
       toast.info("Preview not available for this question type yet!");
     }
+  };
+
+  const handleResetCode = () => {
+    if (!content) return;
+
+    const initialFiles = content.boilerplateFiles.reduce(
+      (
+        acc: Record<string, string>,
+        file: { name: string; content: string }
+      ) => ({
+        ...acc,
+        [file.name]: file.content,
+      }),
+      {} as Record<string, string>
+    );
+
+    setFileContents(initialFiles);
+
+    // Clear from localStorage
+    if (chapterId) {
+      const storageKey = `code_${courseId}_${chapterId}`;
+      localStorage.removeItem(storageKey);
+    }
+
+    toast.success("Code reset to original!");
   };
 
   const handleMarkComplete = async () => {
@@ -318,6 +369,14 @@ const Page = () => {
                   {">"}
                 </h2>
                 <div className="flex gap-2">
+                  <button
+                    onClick={handleResetCode}
+                    className="px-3 py-1 bg-gray-400 hover:bg-gray-500 border-2 border-black font-game font-normal text-xs shadow-[2px_2px_0_0_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[1px_1px_0_0_#000] transition-all flex items-center gap-1"
+                    title="Reset to original code"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    Reset
+                  </button>
                   <button
                     onClick={handleRunCode}
                     className="px-3 py-1 bg-yellow-400 hover:bg-yellow-500 border-2 border-black font-game font-normal text-xs shadow-[2px_2px_0_0_#000] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[1px_1px_0_0_#000] transition-all"

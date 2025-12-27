@@ -58,7 +58,7 @@ const Hero = () => {
                 WEB DEV ADVENTURE
               </h2>
 
-              <div className="h-1 w-24 bg-gradient-to-r from-purple-500 via-pink-500 to-yellow-400 mx-auto mb-4" />
+              <div className="h-1 w-50 bg-gray-400 mx-auto mb-4" />
 
               <p className="font-comfortaa text-xs sm:text-sm md:text-base text-gray-200 text-center mb-2 leading-relaxed">
                 Beginner friendly courses and interactive projects
@@ -130,7 +130,6 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Container Scroll Animation Section */}
       <ContainerScroll
         titleComponent={
           <div className="flex flex-col items-center justify-center">

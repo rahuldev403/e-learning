@@ -32,7 +32,7 @@ const Welcomebanner = () => {
         transition={{ duration: 0.6, delay: 0.2 }}
         className="font-game font-normal text-sm sm:text-lg md:text-2xl lg:text-3xl ml-1 sm:ml-3"
       >
-        Yo, ready to level up DEV ? Welcome back,{" "}
+        Yo, ready to level up DEV ? Welcome ,{" "}
         <motion.span
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
