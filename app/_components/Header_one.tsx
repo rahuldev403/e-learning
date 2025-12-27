@@ -17,7 +17,8 @@ import { useParams, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { isAdmin } from "@/lib/admin";
-
+import logo from "@/public/logo.jpeg";
+import Image from "next/image";
 interface Course {
   id: number;
   courseId: string;
@@ -56,11 +57,14 @@ const Header_one = () => {
     : null;
 
   return (
-    <div className="flex justify-between items-center px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-b border-gray-800 b-shadow-md">
-      <Link href="/" className="flex-shrink-0">
-        <h2 className="font-bold font-game font-normal bg-gradient-to-r from-[#af38cd] via-[#210125] to-[#8713e6] bg-clip-text text-transparent text-xl sm:text-2xl lg:text-3xl">
-          streak-setter
-        </h2>
+    <div className="flex justify-between items-center px-4 sm:px-6 lg:px-8 py-3 sm:py-4 border-b border-gray-800 b-shadow-md ">
+      <Link href="/" className="shrink-0">
+        <Image
+          src={logo}
+          alt="Logo"
+          width={100}
+          className="md:h-12 rounded-lg md:w-47 w-24"
+        />
       </Link>
 
       {/* Chapter name in center - hide on small screens */}
@@ -72,7 +76,7 @@ const Header_one = () => {
         </div>
       )}
 
-      <div className="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+      <div className="flex items-center gap-2 sm:gap-4 shrink-0">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
@@ -122,7 +126,7 @@ const Header_one = () => {
                         href={`/courses/${course.courseId}`}
                         className="flex flex-col items-start gap-1 p-3 rounded-md hover:bg-accent transition-colors w-full"
                       >
-                        <span className="font-game font-normal text-sm font-semibold text-foreground">
+                        <span className="font-game font-normal text-sm text-foreground">
                           {course.title}
                         </span>
                         <span className="font-comfortaa text-xs text-muted-foreground leading-relaxed">
@@ -136,14 +140,18 @@ const Header_one = () => {
             </DropdownMenuSub>
             <DropdownMenuItem disabled>
               <div className="flex items-center justify-between w-full">
-              <span>Problems</span>
-              <span className="text-xs text-muted-foreground ml-2">Coming soon</span>
+                <span>Problems</span>
+                <span className="text-xs text-muted-foreground ml-2">
+                  Coming soon
+                </span>
               </div>
             </DropdownMenuItem>
             <DropdownMenuItem disabled>
               <div className="flex items-center justify-between w-full">
-              <span>Notes</span>
-              <span className="text-xs text-muted-foreground ml-2">Coming soon</span>
+                <span>Notes</span>
+                <span className="text-xs text-muted-foreground ml-2">
+                  Coming soon
+                </span>
               </div>
             </DropdownMenuItem>
           </DropdownMenuContent>

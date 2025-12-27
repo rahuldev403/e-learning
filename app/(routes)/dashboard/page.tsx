@@ -62,7 +62,7 @@ const Page = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5 }}
-        className="h-[calc(100vh-73px)] w-full flex items-center justify-center px-4 bg-gradient-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800"
+        className="h-[calc(100vh-73px)] w-full flex items-center justify-center px-4 bg-linear-to-br from-blue-50 to-purple-50 dark:from-gray-900 dark:to-gray-800"
       >
         <motion.div
           initial={{ scale: 0.9, y: 20 }}
@@ -155,7 +155,9 @@ const Page = () => {
             className="flex flex-col gap-4 sm:gap-6 border-2 items-center border-gray-600 p-3 sm:p-4 rounded-lg"
           >
             <UserStatus stats={dashboardData?.stats} loading={loading} />
-            <UpgradeToPro />
+            <div className="mt-15">
+              <UpgradeToPro />
+            </div>
           </motion.div>
         </div>
 
