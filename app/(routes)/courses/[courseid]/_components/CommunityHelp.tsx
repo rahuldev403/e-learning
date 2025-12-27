@@ -8,12 +8,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface CommunityHelpProps {
   courseId: string;
 }
 
-export const CommunityHelp = ({ courseId }: CommunityHelpProps) => {
+export const CommunityHelp = ({ }: CommunityHelpProps) => {
   return (
     <Card className="bg-gray-100 dark:bg-gray-800 border-4 border-gray-800  rounded-md">
       <CardHeader>
@@ -33,14 +38,22 @@ export const CommunityHelp = ({ courseId }: CommunityHelpProps) => {
           Join our community to ask questions, share insights, and connect with
           other students taking this course.
         </p>
-        <Link href={`/community?course=${courseId}`}>
-          <Button
-            className="w-full font-game font-normal rounded-md text-xs sm:text-sm"
-            variant={"pixel"}
-          >
-            Go to Community
-          </Button>
-        </Link>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className="inline-block w-full">
+              <Button
+                className="w-full font-game font-normal rounded-md text-xs sm:text-sm disabled:bg-gray-400 disabled:cursor-not-allowed pointer-events-none"
+                variant={"pixel"}
+                disabled
+              >
+                Go to Community
+              </Button>
+            </span>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Coming Soon</p>
+          </TooltipContent>
+        </Tooltip>
       </CardContent>
     </Card>
   );

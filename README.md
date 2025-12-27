@@ -39,12 +39,15 @@ CLERK_SECRET_KEY=
 # Database
 DATABASE_URL=
 
+
 # SMTP (for email invitations)
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=
 SMTP_PASS=
 ```
+
+
 
 3. Run the development server:
 

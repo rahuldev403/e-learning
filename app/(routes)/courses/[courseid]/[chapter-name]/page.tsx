@@ -124,7 +124,6 @@ const Page = () => {
     setFileContents((prev) => {
       const updated = { ...prev, [fileName]: code };
 
-      // Save to localStorage
       if (chapterId) {
         const storageKey = `code_${courseId}_${chapterId}`;
         localStorage.setItem(storageKey, JSON.stringify(updated));
