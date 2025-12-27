@@ -13,7 +13,6 @@ const Hero = () => {
 
   return (
     <div className="flex flex-col overflow-hidden">
-      {/* Full-screen GIF Hero Section */}
       <div className="relative w-full h-screen">
         <div
           className="absolute inset-0 w-full h-full"
@@ -136,7 +135,7 @@ const Hero = () => {
         titleComponent={
           <div className="flex flex-col items-center justify-center">
             <h2
-              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-game font-normal text-white text-center mb-4"
+              className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-game font-normal text-white text-center "
               style={{ textShadow: "3px 3px 0 #000, -1px -1px 0 #000" }}
             >
               <span className="text-purple-500">EXPLORE</span> THE JOURNEY

@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
+import { useUser } from "@clerk/nextjs";
+import { useRouter } from "next/navigation";
 import Hero from "./_components/Hero";
 import Description from "./_components/Description";
 import Footer from "./_components/Footer";
@@ -9,7 +11,15 @@ import CourseList from "./_components/CourseList";
 import { MonitorIcon } from "lucide-react";
 
 const page = () => {
+  const { isSignedIn, isLoaded } = useUser();
+  const router = useRouter();
   const [isSmallDevice, setIsSmallDevice] = useState(false);
+
+  useEffect(() => {
+    if (isLoaded && isSignedIn) {
+      router.push("/dashboard");
+    }
+  }, [isSignedIn, isLoaded, router]);
 
   useEffect(() => {
     const checkDeviceSize = () => {
@@ -21,6 +31,11 @@ const page = () => {
 
     return () => window.removeEventListener("resize", checkDeviceSize);
   }, []);
+
+  // Show loading or nothing while checking auth
+  if (!isLoaded || isSignedIn) {
+    return null;
+  }
 
   return (
     <motion.div
