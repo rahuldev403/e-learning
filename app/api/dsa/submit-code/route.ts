@@ -580,7 +580,20 @@ function wrapCppCode(userCode: string, input: string): string {
   }
 
   const hasClassSolution = /class\s+Solution\b/.test(userCode);
-  const signatureMatch = userCode.match(
+  // Access-specifier labels would otherwise be swallowed into the return type
+  // ("public:\n    void"), breaking the void/vector/scalar branch below.
+  // Only public members are callable from the harness, so search those first;
+  // otherwise a private helper declared above the real method gets picked.
+  const publicSections = [
+    ...userCode.matchAll(
+      /\bpublic\s*:([\s\S]*?)(?=\b(?:private|protected|public)\s*:|$)/g,
+    ),
+  ].map((match) => match[1]);
+
+  const codeForSignature = (
+    publicSections.length > 0 ? publicSections.join("\n") : userCode
+  ).replace(/\b(public|private|protected)\s*:/g, " ");
+  const signatureMatch = codeForSignature.match(
     /([A-Za-z_][\w:<>,\s&\*]*)\s+(\w+)\s*\(([^)]*)\)\s*\{/,
   );
 
@@ -665,16 +678,16 @@ using namespace std;
 ${userCode}
 
 string trim(const string& s) {
-    size_t start = s.find_first_not_of(" \t\r\n");
+    size_t start = s.find_first_not_of(" \\t\\r\\n");
     if (start == string::npos) return "";
-    size_t end = s.find_last_not_of(" \t\r\n");
+    size_t end = s.find_last_not_of(" \\t\\r\\n");
     return s.substr(start, end - start + 1);
 }
 
 string stripQuotes(const string& value) {
     string out = trim(value);
-    if (!out.empty() && (out.front() == '\"' || out.front() == '\'')) out.erase(out.begin());
-    if (!out.empty() && (out.back() == '\"' || out.back() == '\'')) out.pop_back();
+    if (!out.empty() && (out.front() == '"' || out.front() == '\\'')) out.erase(out.begin());
+    if (!out.empty() && (out.back() == '"' || out.back() == '\\'')) out.pop_back();
     return trim(out);
 }
 
